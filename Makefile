@@ -14,7 +14,7 @@ OPT=-O3
 DEPFLAGS=-MP -MD
 # automatically add the -I onto each include directory
 CFLAGS=-Wall -Wextra -pedantic -g $(foreach D,$(INCDIRS),-I$(D)) $(OPT) $(DEPFLAGS)
-CFLAGS+= -w --std=c++17 -lm -ldl -m64 -pg -lemon -D DEBUG -D SANITY_CHECK # -D CONTEST_BENCHMARK ## O3 optimization with debug added.
+CFLAGS+= -w --std=c++11 -lm -ldl -m64 -pg -lemon -D DEBUG -D SANITY_CHECK # -D CONTEST_BENCHMARK ## O3 optimization with debug added.
 # CFLAGS+= -D CONTEST_BENCHMARK
 
 # Warning about unused code. Ref: https://stackoverflow.com/questions/4813947/how-can-i-know-which-parts-in-the-code-are-never-used/.
@@ -28,6 +28,7 @@ CFILES=$(foreach D,$(CODEDIRS),$(wildcard $(D)/*.cpp))
 OBJECTS=$(patsubst %.cpp,%.o,$(CFILES))
 DEPFILES=$(patsubst %.cpp,%.d,$(CFILES))
 
+# This works on local virtual machine
 all: $(BINARY)
 
 $(BINARY): $(OBJECTS)
@@ -37,6 +38,11 @@ $(BINARY): $(OBJECTS)
 #
 %.o:%.cpp
 	$(CC) $(CFLAGS) -c -o $@ $<
+
+# This works on CESG Sever (ecesvj10101.ece.tamu.edu)
+oneline:
+	g++ -m64 -g -o $(BINARY) src/main.cpp src/ILPSolver.cpp -I$(GUROBIINC) -L$(GUROBILIB)
+ 
 
 clean:
 	rm -rf $(BINARY) $(OBJECTS) $(DEPFILES)
