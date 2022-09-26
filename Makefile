@@ -1,5 +1,5 @@
 # Gurobi library
-GUROBIPATH=/home/steven/Documents/gurobi952/linux64
+GUROBIPATH=${GUROBI_HOME}
 GUROBIINC=$(GUROBIPATH)/include/
 GUROBILIB=$(GUROBIPATH)/lib -lgurobi_c++ -lgurobi95
 
