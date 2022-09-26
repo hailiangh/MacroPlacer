@@ -1,3 +1,6 @@
+###########################################
+# Below are the templats for C++
+
 # Prerequisites
 *.d
 
@@ -30,3 +33,12 @@
 *.exe
 *.out
 *.app
+
+# End of the template
+############################################
+
+# Executables
+main
+
+# Output files
+output/*
