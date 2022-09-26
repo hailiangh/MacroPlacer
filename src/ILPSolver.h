@@ -23,6 +23,21 @@ public:
     //     : m_db(db), m_nl(nl)
     // {}
     // MacroPlacer ();
+    struct JOB {
+        JOB(const std::string name, int arrSzY, int arrSzX, int stSzY, int stSzX, double wtX, double wtY, bool rltCstrX, bool rltCstrY) :
+            name(name), arraySizeY(arrSzY), arraySizeX(arrSzX), siteSizeY(stSzY), siteSizeX(stSzX), 
+            weightX(wtX), weightY(wtY), relativeConstraintX(rltCstrX), relativeConstraintY(rltCstrY) {}
+
+        std::string     name;
+        int             arraySizeY;
+        int             arraySizeX;
+        int             siteSizeY;
+        int             siteSizeX;
+        double          weightX = 1;
+        double          weightY = 1;
+        bool            relativeConstraintX = 0;
+        bool            relativeConstraintY = 0;
+    };
 
 
     // For trials using ILP.
@@ -34,6 +49,8 @@ public:
     void    run();
     void    run2();
     void    runBatch();
+    void    runBatchFromFile(const std::string batchFileName);
+    void    runJobs();
 
     // DSP placement prior to global placement.
     void    placeAndFixDSP();
@@ -73,6 +90,7 @@ private:
     bool m_relativeConstraintY = false;
 
     // Vector2D<IndexType> m_dspIdArray;
+    std::vector<JOB> m_jobList;
 };
 
 

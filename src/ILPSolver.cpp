@@ -1,8 +1,13 @@
 #include "ILPSolver.h"
+#include "util.h"
 #include <memory>
 // #include "../or-tools/ortools/linear_solver/linear_solver.h"
 #include "gurobi_c++.h"
 #include <string>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <string.h>
 
 
 /**
@@ -636,6 +641,59 @@ void MacroPlacer::runBatch() {
     setProblemSize(8, 8, 20, 8); 
     run2();
 }
+
+/**
+ * @brief Run in batch mode. Jobs are specified in file <batchFileName>.
+ * 
+ * @param batchFileName 
+ */
+void MacroPlacer::runBatchFromFile(const std::string batchFileName) {
+    // Read the batch file.
+    std::ifstream fs(batchFileName);
+    if (!fs.good()) {
+        printf("ERR: Read file [%s] failed!\n", batchFileName.c_str());
+    }
+    std::vector<std::string> tokens;
+    while (read_line_as_tokens(fs, tokens)) {
+        // Skip lines starting with "#".
+        if (strncmp(tokens[0].c_str(), "#", 1) == 0) {
+        // if (strcmp(tokens[0], "#") == 0) {
+            continue;
+        }
+        else if (tokens.size() == 9) {
+            m_jobList.emplace_back(tokens[0],stoi(tokens[1]),stoi(tokens[2]),stoi(tokens[3]),stoi(tokens[4]),stod(tokens[5]),stod(tokens[6]),stoi(tokens[7]),stoi(tokens[8]));
+        }
+        else {
+            printf("ERR: Unexpected input length: %d", tokens.size());
+        }
+    }
+    printf("Job size: %d\n", m_jobList.size());
+
+    fs.close();
+
+    // Run jobs.
+    runJobs();
+
+    printf("Job List Finished.\n");
+    printf("--------------------------------\n");
+}
+
+void MacroPlacer::runJobs() {
+    for (const JOB &job: m_jobList) {
+        setProblemSize(job.arraySizeY, job.arraySizeX, job.siteSizeY, job.siteSizeX);
+        setXYWeight(job.weightX, job.weightY);
+        setRelativeConstraintXY(job.relativeConstraintX, job.relativeConstraintY);
+
+        printf("--------------------------------\n");
+        printf("Run Job [%s]..\n", job.name.c_str());
+
+        run2();
+
+        printf("--------------------------------\n");
+
+    }
+}
+
 
 /**
  * @brief cost of flow (connection) between cell[i] and cell[j] 

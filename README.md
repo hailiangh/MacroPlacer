@@ -9,4 +9,5 @@ export GUROBI_HOME="$HOME/Documents/gurobi952/linux64"
 ```
 
 ### Make
-Run `make` to buld the project.
+Run `make` or `make oneline` to buld the project.
+Run `./main` to run the program.
