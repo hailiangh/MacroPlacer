@@ -41,7 +41,7 @@
 main
 
 # Output files
-output/*
+output/*.sol
 
 # vscode configure files
 .vscode/*
