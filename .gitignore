@@ -44,5 +44,8 @@ main
 output/*.sol
 output/*.png
 
+# Log files
+input/*.log
+
 # vscode configure files
 .vscode/*
