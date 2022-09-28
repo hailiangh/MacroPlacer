@@ -91,17 +91,18 @@ def plotFromFile(solFileName):
         for j in range(X):
             s = "(" + str(i) + "," + str(j) + ")"
             plotBox(j - 0.5 * width, i - 0.5 * height, width, height, colorMap(j, i, Y), edgeColorMap(j, i), ax1, s)
-            plotBox(x[i][j] - 0.5 * width, y[i][j] - 0.5 * height, width, height, colorMap(j, i, Y), edgeColorMap(j, i), ax2, s)
+            # plotBox(x[i][j] - 0.5 * width, y[i][j] - 0.5 * height, width, height, colorMap(j, i, Y), edgeColorMap(j, i), ax2, s)
+            plotBox(wtX * x[i][j] - 0.5 * width, wtY * y[i][j] - 0.5 * height, width, height, colorMap(j, i, Y), edgeColorMap(j, i), ax2, s)
 
     ## Plot nets.
     for i in range(Y):
         for j in range(X):
             if (i < Y - 1):
                 plotLine(j, i, j, i+1, 0 , ax1)
-                plotLine(x[i][j], y[i][j], x[i+1][j], y[i+1][j], 0, ax2)
+                plotLine(wtX * x[i][j], wtY * y[i][j], wtX * x[i+1][j], wtY * y[i+1][j], 0, ax2)
             if (j < X - 1):
                 plotLine(j, i, j+1, i, 0, ax1)
-                plotLine(x[i][j], y[i][j], x[i][j+1], y[i][j+1], 0, ax2)
+                plotLine(wtX * x[i][j], wtY * y[i][j], wtX * x[i][j+1], wtY * y[i][j+1], 0, ax2)
 
     # ## Plot the target area.
     # ax2.add_patch(Rectangle((0, 0), targetWidth, targetHeight, color = 'silver'))
@@ -111,9 +112,14 @@ def plotFromFile(solFileName):
     ax1.set_ylim([-1, Y+1])
     ax1.axis('equal')
     ax1.set_title('Array size: ' + str(Y) + " x " + str(X))
-    ax2.set_xlim([-1, targetWidth+1])
-    ax2.set_ylim([-1, targetHeight+1])
+    ax2.set_xlim([-1, wtX * targetWidth+1])
+    ax2.set_ylim([-1, wtY * targetHeight+1])
     ax2.set_title('Site limit: ' + str(targetHeight) + " x " + str(targetWidth))
+    xticks =  list(range(targetWidth))
+    print("tick is", xticks)
+    xticks = [x * wtX for x in xticks]
+    print("tick is", xticks)
+    ax2.set_xticks(xticks)
     ax2.axis('equal')
     title = 'Total WL: ' + str(obj)
     title += '\nWeight(x): ' + str(wtX) + "; Weight(y): " + str(wtY) 
