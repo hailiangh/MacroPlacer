@@ -189,7 +189,7 @@ void MacroPlacer::setProblemSize(int arraySizeY, int arraySizeX, int siteSizeY, 
  * @param weightX 
  * @param weightY 
  */
-void MacroPlacer::setXYWeight(int weightX, int weightY) {
+void MacroPlacer::setXYWeight(double weightX, double weightY) {
     m_weightX = weightX;
     m_weightY = weightY;
     // DBG("setXYWeight: %d, %d.\n", weightX, weightY);
@@ -488,6 +488,9 @@ void MacroPlacer::run2() {
             
         }
     }
+
+    // Set cell[0][0] to the lower-left corner if possible.
+    objTotalWl += 0.01 * (x[0][0] + y[0][0]);
 
     // DBG("Setting Objective..\n");
     try {

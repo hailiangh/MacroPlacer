@@ -42,7 +42,7 @@ public:
 
     // For trials using ILP.
     void    setProblemSize(int arraySizeY, int arraySizeX, int siteSizeY, int sizeSizeX); // TBF
-    void    setXYWeight(int weightX, int weightY);
+    void    setXYWeight(double weightX, double weightY);
     void    setRelativeConstraintX(bool b);
     void    setRelativeConstraintY(bool b);
     void    setRelativeConstraintXY(bool bx, bool by);
@@ -83,8 +83,8 @@ private:
     int m_siteSizeX = 0;
     int m_siteSizeY = 0; 
 
-    int m_weightX = 1;
-    int m_weightY = 1;
+    double m_weightX = 1;
+    double m_weightY = 1;
 
     bool m_relativeConstraintX = false;
     bool m_relativeConstraintY = false;

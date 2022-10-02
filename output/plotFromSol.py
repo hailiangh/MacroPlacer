@@ -25,7 +25,7 @@ def plotFromFile(solFileName):
 
     # print(solFileName)
     
-    name = solFileName.split(".")
+    name = solFileName.split(".sol")
     plotFileName = name[0] + ".png"
     print('plotFromFile <{}> to <{}>'.format(solFileName, plotFileName))
 
@@ -42,10 +42,15 @@ def plotFromFile(solFileName):
     wtX = 1
     wtY = 1
     if (len(tokens) > 6):
+        # print("wtY = ", tokens[11])
+        print("len = ", len(tokens))
+        print("tokens is ", name[0])
         relPosX = int(tokens[7]) # bool, if relative position constraint is applied in X direction.
         relPosY = int(tokens[8]) # bool, if relative position constraint is applied in Y direction.
-        wtX = int(tokens[10]) # weight in X direction.
-        wtY = int(tokens[11]) # weight in X direction.
+        wtX = float(tokens[10]) # weight in X direction.
+        wtY = float(tokens[11]) # weight in Y direction.
+        # wtX = int(tokens[10]) # weight in X direction.
+        # wtY = int(tokens[11]) # weight in Y direction.
 
     
     x = np.zeros((Y,X))
