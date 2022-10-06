@@ -1,9 +1,34 @@
 # This file specify the jobs in batch mode.
 # Each job is listed in one line, with properties in each columns separated by space " ".
 # JobName, arraySizeY, arraySizeX, siteSizeY, siteSizeX, weightX, weightY, relativeConstraintX, relativeConstraintY.
-job0 7 7 20 6 1 1 1 1
-job0 7 7 20 5 1 1 1 1
-job1 7 7 20 4 1 1 1 1
-job2 7 7 30 3 1 1 1 1
-job3 7 7 40 2 1 1 1 1
-job4 7 7 60 1 1 1 1 1
+job0 8 8 64 8 1 1 1 1 1800
+job0 8 8 64 8 2 1 1 1 1800
+job0 8 8 64 8 3 1 1 1 1800
+job0 8 8 64 8 4 1 1 1 1800
+job0 8 8 64 8 5 1 1 1 1800
+job0 8 8 64 8 6 1 1 1 1800
+job0 8 8 64 8 7 1 1 1 1800
+job0 8 8 64 8 8 1 1 1 1800
+job0 8 8 64 8 9 1 1 1 1800
+job0 8 8 64 8 10 1 1 1 1800
+job0 8 8 64 8 11 1 1 1 1800
+job0 8 8 64 8 12 1 1 1 1800
+job0 8 8 64 8 13 1 1 1 1800
+job0 8 8 64 8 14 1 1 1 1800
+job0 8 8 64 8 15 1 1 1 1800
+job0 8 8 64 8 16 1 1 1 1800
+job0 8 8 64 8 17 1 1 1 1800
+job0 8 8 64 8 18 1 1 1 1800
+job0 8 8 64 8 19 1 1 1 1800
+job0 8 8 64 8 20 1 1 1 1800
+job0 8 8 64 8 21 1 1 1 1800
+job0 8 8 64 8 22 1 1 1 1800
+job0 8 8 64 8 23 1 1 1 1800
+job0 8 8 64 8 24 1 1 1 1800
+job0 8 8 64 8 25 1 1 1 1800
+job0 8 8 64 8 26 1 1 1 1800
+job0 8 8 64 8 27 1 1 1 1800
+job0 8 8 64 8 28 1 1 1 1800
+job0 8 8 64 8 29 1 1 1 1800
+job0 8 8 64 8 30 1 1 1 1800
+job0 8 8 64 8 31 1 1 1 1800
