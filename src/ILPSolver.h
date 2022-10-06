@@ -28,6 +28,10 @@ public:
             name(name), arraySizeY(arrSzY), arraySizeX(arrSzX), siteSizeY(stSzY), siteSizeX(stSzX), 
             weightX(wtX), weightY(wtY), relativeConstraintX(rltCstrX), relativeConstraintY(rltCstrY) {}
 
+        JOB(const std::string name, int arrSzY, int arrSzX, int stSzY, int stSzX, double wtX, double wtY, bool rltCstrX, bool rltCstrY, double timeLimit) :
+            name(name), arraySizeY(arrSzY), arraySizeX(arrSzX), siteSizeY(stSzY), siteSizeX(stSzX), 
+            weightX(wtX), weightY(wtY), relativeConstraintX(rltCstrX), relativeConstraintY(rltCstrY), timeLimit(timeLimit) {}
+
         std::string     name;
         int             arraySizeY;
         int             arraySizeX;
@@ -37,6 +41,7 @@ public:
         double          weightY = 1;
         bool            relativeConstraintX = 0;
         bool            relativeConstraintY = 0;
+        double          timeLimit = -1;
     };
 
 
@@ -46,6 +51,7 @@ public:
     void    setRelativeConstraintX(bool b);
     void    setRelativeConstraintY(bool b);
     void    setRelativeConstraintXY(bool bx, bool by);
+    void    setTimeLimit(double timeLimit);
     void    run();
     void    run2();
     void    runBatch();
@@ -88,6 +94,8 @@ private:
 
     bool m_relativeConstraintX = false;
     bool m_relativeConstraintY = false;
+
+    double m_timeLimit = -1;
 
     // Vector2D<IndexType> m_dspIdArray;
     std::vector<JOB> m_jobList;

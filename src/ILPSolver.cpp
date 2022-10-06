@@ -224,6 +224,14 @@ void MacroPlacer::setRelativeConstraintXY(bool bx, bool by) {
     m_relativeConstraintY = by;
 }
 
+/**
+ * @brief Set the time limit (in seconds) for the solver. 
+ * 
+ * @param timeLimit 
+ */
+void MacroPlacer::setTimeLimit(double timeLimit) {
+    m_timeLimit = timeLimit;
+}
 
 /**
  * @brief Entry function of the macro placer.
@@ -364,6 +372,11 @@ void MacroPlacer::run2() {
     
     GRBEnv env = GRBEnv();
     GRBModel model = GRBModel(env);
+
+    // Set time limit.
+    if (m_timeLimit > 0) {
+        model.set(GRB_DoubleParam_TimeLimit, m_timeLimit);
+    }
 
     // Add decision variables.
     
@@ -666,6 +679,9 @@ void MacroPlacer::runBatchFromFile(const std::string batchFileName) {
         else if (tokens.size() == 9) {
             m_jobList.emplace_back(tokens[0],stoi(tokens[1]),stoi(tokens[2]),stoi(tokens[3]),stoi(tokens[4]),stod(tokens[5]),stod(tokens[6]),stoi(tokens[7]),stoi(tokens[8]));
         }
+        else if (tokens.size() == 10) {
+            m_jobList.emplace_back(tokens[0],stoi(tokens[1]),stoi(tokens[2]),stoi(tokens[3]),stoi(tokens[4]),stod(tokens[5]),stod(tokens[6]),stoi(tokens[7]),stoi(tokens[8]), stod(tokens[9]));
+        }
         else {
             printf("ERR: Unexpected input length: %d", tokens.size());
         }
@@ -686,6 +702,7 @@ void MacroPlacer::runJobs() {
         setProblemSize(job.arraySizeY, job.arraySizeX, job.siteSizeY, job.siteSizeX);
         setXYWeight(job.weightX, job.weightY);
         setRelativeConstraintXY(job.relativeConstraintX, job.relativeConstraintY);
+        setTimeLimit(job.timeLimit);
 
         printf("--------------------------------\n");
         printf("Run Job [%s]..\n", job.name.c_str());
