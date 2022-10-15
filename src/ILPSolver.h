@@ -24,11 +24,11 @@ public:
     // {}
     // MacroPlacer ();
     struct JOB {
-        JOB(const std::string name, int arrSzY, int arrSzX, int stSzY, int stSzX, double wtX, double wtY, bool rltCstrX, bool rltCstrY) :
+        JOB(const std::string name, int arrSzY, int arrSzX, int stSzY, int stSzX, int wtX, int wtY, bool rltCstrX, bool rltCstrY) :
             name(name), arraySizeY(arrSzY), arraySizeX(arrSzX), siteSizeY(stSzY), siteSizeX(stSzX), 
             weightX(wtX), weightY(wtY), relativeConstraintX(rltCstrX), relativeConstraintY(rltCstrY) {}
 
-        JOB(const std::string name, int arrSzY, int arrSzX, int stSzY, int stSzX, double wtX, double wtY, bool rltCstrX, bool rltCstrY, double timeLimit) :
+        JOB(const std::string name, int arrSzY, int arrSzX, int stSzY, int stSzX, int wtX, int wtY, bool rltCstrX, bool rltCstrY, double timeLimit) :
             name(name), arraySizeY(arrSzY), arraySizeX(arrSzX), siteSizeY(stSzY), siteSizeX(stSzX), 
             weightX(wtX), weightY(wtY), relativeConstraintX(rltCstrX), relativeConstraintY(rltCstrY), timeLimit(timeLimit) {}
 
@@ -47,13 +47,14 @@ public:
 
     // For trials using ILP.
     void    setProblemSize(int arraySizeY, int arraySizeX, int siteSizeY, int sizeSizeX); // TBF
-    void    setXYWeight(double weightX, double weightY);
+    void    setXYWeight(int weightX, int weightY);
     void    setRelativeConstraintX(bool b);
     void    setRelativeConstraintY(bool b);
     void    setRelativeConstraintXY(bool bx, bool by);
     void    setTimeLimit(double timeLimit);
     void    run();
     void    run2();
+    void    run3();
     void    runBatch();
     void    runBatchFromFile(const std::string batchFileName);
     void    runJobs();
@@ -89,8 +90,8 @@ private:
     int m_siteSizeX = 0;
     int m_siteSizeY = 0; 
 
-    double m_weightX = 1;
-    double m_weightY = 1;
+    int m_weightX = 1;
+    int m_weightY = 1;
 
     bool m_relativeConstraintX = false;
     bool m_relativeConstraintY = false;

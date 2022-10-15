@@ -189,7 +189,7 @@ void MacroPlacer::setProblemSize(int arraySizeY, int arraySizeX, int siteSizeY, 
  * @param weightX 
  * @param weightY 
  */
-void MacroPlacer::setXYWeight(double weightX, double weightY) {
+void MacroPlacer::setXYWeight(int weightX, int weightY) {
     m_weightX = weightX;
     m_weightY = weightY;
     // DBG("setXYWeight: %d, %d.\n", weightX, weightY);
@@ -504,6 +504,188 @@ void MacroPlacer::run2() {
 
     // Set cell[0][0] to the lower-left corner if possible.
     objTotalWl += 0.01 * (x[0][0] + y[0][0]);
+
+    // DBG("Setting Objective..\n");
+    try {
+        model.setObjective(objTotalWl, GRB_MINIMIZE);
+        // assert(0);
+    } catch (GRBException e) {
+        // DBG("%s\n", e.getMessage().c_str());
+    }
+
+    // model.setObjective(objTotalWl, GRB_MINIMIZE);
+
+    // DBG("Solve model..\n");
+
+    model.optimize();
+
+    // DBG("Optimize() done.\n");
+    // DVD();
+
+    // DBG("Writing model..\n");
+    std::string fileName = "output/macroPl_" + std::to_string(m_arraySizeY) + "_" + std::to_string(m_arraySizeX) 
+                            + "_to_" + std::to_string(m_siteSizeY) + "_" + std::to_string(m_siteSizeX); 
+        
+    // Relative position constraints in X/Y direction.
+    fileName += "_rpXY_" + std::to_string(m_relativeConstraintX) + "_" + std::to_string(m_relativeConstraintY);
+
+    // Weights in X/Y direction.
+    fileName += "_wtXY_" + std::to_string(m_weightX) + "_" + std::to_string(m_weightY);
+
+    try {
+        model.write(fileName + ".sol");
+        // DBG("Solution written to %s\n", fileName.c_str());
+    } catch (GRBException e) {
+        // DBG("%s\n", e.getMessage().c_str());
+    }
+    // model.write(fileName + "pl");
+    // model.write(fileName + "sol");
+    // model.write(fileName + "json");
+}
+
+/**
+ * @brief Mapping an m x n array into one column.
+ * 
+ */
+void MacroPlacer::run3() {
+    printf("Problem size: mapping %d x %d => %d x %d \n", m_arraySizeY, m_arraySizeX, m_siteSizeY, m_siteSizeX);
+    if (m_siteSizeX != 1) {
+        printf("WRN: %s is only used for mapping into one column! Function stops.\n", __func__);
+        return;
+    }
+    
+    GRBEnv env = GRBEnv();
+    GRBModel model = GRBModel(env);
+
+    // Set time limit.
+    if (m_timeLimit > 0) {
+        model.set(GRB_DoubleParam_TimeLimit, m_timeLimit);
+    }
+
+    // Add decision variables.
+    
+    // DBG("Adding variables..\n");
+    // GRBVar x[m_arraySizeY][m_arraySizeX]; 
+    GRBVar y[m_arraySizeY][m_arraySizeX]; 
+    
+    // // dx[i0][j0][i1][j1] = x[i0][j0] - x[i1][j1]
+    // // dy[i0][j0][i1][j1] = y[i0][j0] - y[i1][j1]
+    // GRBVar dx[m_arraySizeY][m_arraySizeX][m_arraySizeY][m_arraySizeX];
+    // GRBVar dy[m_arraySizeY][m_arraySizeX][m_arraySizeY][m_arraySizeX];
+
+    // // absDx[i0][j0][i1][j1] = |dx[i0][j0][i1][j1]|
+    // // absDy[i0][j0][i1][j1] = |dy[i0][j0][i1][j1]|
+    // GRBVar absDx[m_arraySizeY][m_arraySizeX][m_arraySizeY][m_arraySizeX];
+    // GRBVar absDy[m_arraySizeY][m_arraySizeX][m_arraySizeY][m_arraySizeX];
+
+
+    // Add constraints.
+
+    int i, j, m, n;
+    int i0, j0, i1, j1;
+    std::string s, s_index;
+
+    // 0 <= xi <= m_siteSizeX.
+    // 0 <= yi <= m_siteSizeY.
+
+    for (i = 0; i < m_arraySizeY; i++) {
+        for (j = 0; j < m_arraySizeX; j++) {
+            // s = "X_" + std::to_string(i) + "_" + std::to_string(j);
+            // x[i][j] = model.addVar(0, m_siteSizeX - 1, 0, GRB_INTEGER, s);
+            s = "Y_" + std::to_string(i) + "_" + std::to_string(j);
+            y[i][j] = model.addVar(0, m_siteSizeY - 1, 0, GRB_INTEGER, s);
+        }
+    }
+
+    // x0 <= x1, y0 <= y1 to remove mirrored solutions.
+    // model.addConstr(x[0][0] <= x[m_arraySizeY-1][m_arraySizeX-1], "no_mirror_x");
+    model.addConstr(y[0][0] <= y[m_arraySizeY-1][m_arraySizeX-1], "no_mirror_y");
+
+
+    // // |x0 - x1| + |y0 - y1| >= 1 to make sure cell[0] and cell[1] don't overlap.
+    // // DBG("Setting constraints..\n");
+    // for (i0 = 0; i0 < m_arraySizeY; i0++) {
+    //     for (j0 = 0; j0 < m_arraySizeX; j0++) {
+    //         for (i1 = i0; i1 < m_arraySizeY; i1++) {
+    //             for (j1 = 0; j1 < m_arraySizeX; j1++) {
+                    
+    //                 if (i0 == i1 && j0 >= j1) {
+    //                     continue;
+    //                 }
+                    
+    //                 s_index = "[" + std::to_string(i0) + "][" + std::to_string(j0) + "]_["
+    //                     + std::to_string(i1) + "][" + std::to_string(j1) + "]";
+
+    //                 // dx[i0][j0][i1][j1] = model.addVar(-GRB_INFINITY, GRB_INFINITY, 0, GRB_INTEGER, "dx" + s_index);
+    //                 // model.addConstr(dx[i0][j0][i1][j1] == x[i0][j0] - x[i1][j1], "constr_dx" + s_index);
+
+    //                 // DBG("AddVar: absDx[%d][%d][%d][%d]\n", i0, j0, i1, j1);
+    //                 absDx[i0][j0][i1][j1] = model.addVar(0, GRB_INFINITY, 0, GRB_INTEGER, "absDx" + s_index);
+    //                 model.addGenConstrAbs(absDx[i0][j0][i1][j1], dx[i0][j0][i1][j1], "constr_absDx" + s_index);
+
+    //                 dy[i0][j0][i1][j1] = model.addVar(-GRB_INFINITY, GRB_INFINITY, 0, GRB_INTEGER, "dy" + s_index);
+    //                 model.addConstr(dy[i0][j0][i1][j1] == y[i0][j0] - y[i1][j1], "constr_dy" + s_index);
+
+    //                 // DBG("AddVar: absDy[%d][%d][%d][%d]\n", i0, j0, i1, j1);
+    //                 absDy[i0][j0][i1][j1] = model.addVar(0, GRB_INFINITY, 0, GRB_INTEGER, "absDy" + s_index);
+    //                 model.addGenConstrAbs(absDy[i0][j0][i1][j1], dy[i0][j0][i1][j1], "constr_absDy" + s_index);
+
+    //                 model.addConstr(absDx[i0][j0][i1][j1] + absDy[i0][j0][i1][j1] >= 1, "no_overlap" + s_index);
+
+
+    //             }
+    //         }
+    //     }
+    // } 
+
+
+    // if (m_relativeConstraintX || m_relativeConstraintY) {
+    if (true) {
+        // set additional constraints on relative position.
+        for (i = 0; i < m_arraySizeY; i++) {
+            for (j = 0; j < m_arraySizeX; j++) {
+                // if (m_relativeConstraintX && j < m_arraySizeX - 1) {
+                //     s = "const_relativeX_" + std::to_string(i) + "_" + std::to_string(j);
+                //     model.addConstr(x[i][j] <= x[i][j+1], s);
+                // }
+                if (i < m_arraySizeY - 1) {
+                    s = "const_relativeY_" + std::to_string(i) + "_" + std::to_string(j);
+                    model.addConstr(y[i][j] + 1 <= y[i+1][j], s);
+                }
+            }
+        }
+    }
+
+
+    // DBG("Setting Objective..\n");
+    // objective
+
+    GRBLinExpr objTotalWl = 0;
+
+    // When relative constraints are satisfied, total WL only depends on the coordinates of the cells on the boundaries of the PE array.
+
+    // Top and bottom boundaries.
+    for (j = 0; j < m_arraySizeX; j++) {
+        
+        i = m_arraySizeY - 1;
+        objTotalWl += y[i][j];
+
+        i = 0;
+        objTotalWl -= y[i][j];
+    }
+
+    // Left and right boundaries.
+    for (i = 0; i < m_arraySizeY; i++) {
+
+        j = 0;
+        objTotalWl -= y[i][j];
+
+        j = m_arraySizeX;
+        objTotalWl += y[i][j];
+    }
+
+    // Set cell[0][0] to the lower-left corner if possible.
+    // objTotalWl += 0.01 * (x[0][0] + y[0][0]);
 
     // DBG("Setting Objective..\n");
     try {
