@@ -14,7 +14,7 @@ int main(int argc, char** argv)  {
     if (argc == 1) {
         MacroPlacer solver;
         solver.setProblemSize(3, 3, 10, 2);
-        solver.run2();
+        solver.run3();
     }
     else if (argc == 3) {
         if ((strcmp(argv[1], "--batch") == 0 ) || (strcmp(argv[1], "-b") == 0 )) {

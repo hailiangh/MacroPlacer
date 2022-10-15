@@ -889,7 +889,12 @@ void MacroPlacer::runJobs() {
         printf("--------------------------------\n");
         printf("Run Job [%s]..\n", job.name.c_str());
 
-        run2();
+        if (job.siteSizeX == 1) {
+            run3();
+        }
+        else {
+            run2();
+        }
 
         printf("--------------------------------\n");
 
