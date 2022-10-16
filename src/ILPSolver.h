@@ -42,8 +42,8 @@ public:
         bool            relativeConstraintX = 0;
         bool            relativeConstraintY = 0;
         double          timeLimit = -1;
-    };
 
+    };
 
     // For trials using ILP.
     void    setProblemSize(int arraySizeY, int arraySizeX, int siteSizeY, int sizeSizeX); // TBF

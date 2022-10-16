@@ -602,6 +602,121 @@ void MacroPlacer::run3() {
     model.addConstr(y[0][0] <= y[m_arraySizeY-1][m_arraySizeX-1], "no_mirror_y");
 
 
+    // No-overlap constraint (NOC) and relative ordering constraint (ROC):
+    // NOC: For each pair, y0 != y1. 
+    // ROC: If cell 0 and cell 1 are in the same row or column in the array, y0 + 1 <= y1.
+    // If the ROC is applied, we can skip the NOC as it is implicitly satisfied. 
+
+    // There are two methods to add the NOC: (y0 != y1) => ( abs(y0-y1) >= 1 )
+
+    // 0: 
+    // dy = y1 - y0;
+    // dyAbs = abs(dy);
+    // dyAbs >= 1;
+
+    // 1:
+    // b0 == 1 if y0 - y1 >= 1; 
+    // b1 == 1 if y1 - y0 >= 1; 
+    // b = b0 OR b1;
+    // b == True;
+
+    // Toggle between these two methods by assigning values to this variable:
+    int NOCMode = 0;
+
+    GRBVar dy[m_arraySizeY][m_arraySizeX][m_arraySizeY][m_arraySizeX];
+    GRBVar dyAbs[m_arraySizeY][m_arraySizeX][m_arraySizeY][m_arraySizeX];
+
+    GRBVar bList[m_arraySizeY][m_arraySizeX][m_arraySizeY][m_arraySizeX][2];
+    // GRBVar b1[m_arraySizeY][m_arraySizeX][m_arraySizeY][m_arraySizeX];
+    GRBVar b[m_arraySizeY][m_arraySizeX][m_arraySizeY][m_arraySizeX];
+
+    // Add the NOC. 
+    for (i0 = 0; i0 < m_arraySizeY; i0++) {
+        for (j0 = 0; j0 < m_arraySizeX; j0++) {
+            for (i1 = i0; i1 < m_arraySizeY; i1++) {
+                for (j1 = 0; j1 < m_arraySizeX; j1++) {
+
+                    if (i0 == i1 && j0 >= j1) {
+                        continue;
+                    }
+
+                    // Double for-loop: for each cell 0 and cell 1 that cell0.row <= cell1.row, and cell0.col < cell1.col.
+
+                    s_index = "[" + std::to_string(i0) + "][" + std::to_string(j0) + "]_["
+                        + std::to_string(i1) + "][" + std::to_string(j1) + "]";
+                    
+                    bool enNOC = true; // By default, NOC is enabled.
+                    
+                    // Add ROC if enabled.
+
+                    if (m_relativeConstraintY) {
+
+                        // Since (y2 >= y1 + 1 and y1 >= y0 + 1) implies (y2 >= y0 + 2),
+                        // we only add ROC for neighbors in the same row or column.
+
+                        // ROC for neighbors in the same row.
+                        if ((i0 == i1) && (j0 + 1 == j1)) {
+                            s = "ROC_" + s_index;
+                            model.addConstr(y[i0][j0] + 1 <= y[i1][j1], s);
+                        }
+
+                        // ROC for neighbors in the same column.
+                        if ((j0 == j1) && (i0 + 1 == i1)) {
+                            s = "ROC_" + s_index;
+                            model.addConstr(y[i0][j0] + 1 <= y[i1][j1], s);
+                        }
+
+                        // NOC is not needed for the cells in the same row or column (for both neighbors and non-neighbors).
+                        if ((i0 == i1) || (j0 == j1)) {
+                            enNOC = false;
+                        }
+                    }
+
+                    // Add NOC if needed.
+
+                    if (enNOC) {
+                        if (NOCMode == 0) {
+                            // dy = y0 - y1;
+                            dy[i0][j0][i1][j1] = model.addVar(-GRB_INFINITY, GRB_INFINITY, 0, GRB_INTEGER, "dy" + s_index);
+                            model.addConstr(dy[i0][j0][i1][j1] == y[i0][j0] - y[i1][j1], "constr_dy" + s_index);
+
+                            // dyAbs = abs(dy);
+                            dyAbs[i0][j0][i1][j1] = model.addVar(0, GRB_INFINITY, 0, GRB_INTEGER, "absDy" + s_index);
+                            model.addGenConstrAbs(dyAbs[i0][j0][i1][j1], dy[i0][j0][i1][j1], "constr_absDy" + s_index);
+
+                            // dyAbs >= 1;
+                            model.addConstr(dyAbs[i0][j0][i1][j1] >= 1, "no_overlap" + s_index);
+                        }
+                        else if (NOCMode == 1) {
+                            // b0 == true if y0 - y1 >= 1; 
+                            bList[i0][j0][i1][j1][0] = model.addVar(0, 1, 0, GRB_BINARY, s); 
+                            model.addGenConstrIndicator(bList[i0][j0][i1][j1][0], true, y[i0][j0] - y[i1][j1] >= 1);
+                            
+                            // b1 == 1 if y1 - y0 >= 1; 
+                            bList[i0][j0][i1][j1][1] = model.addVar(0, 1, 0, GRB_BINARY, s); 
+                            model.addGenConstrIndicator(bList[i0][j0][i1][j1][1], true, y[i1][j1] - y[i0][j0] >= 1);
+
+                            // b == b0 OR b1;
+                            model.addGenConstrOr(b[i0][j0][i1][j1], bList[i0][j0][i1][j1], 2);
+
+                            // b == True;
+                            model.addConstr(b[i0][j0][i1][j1] == true);
+                        }
+                        else {
+                            printf("ERR: Unexpected NOCMode: %d.\n", NOCMode);
+                            // assert(false);
+                        }
+
+
+                    }
+
+                }
+            }
+        }
+    } 
+
+
+
     // // |x0 - x1| + |y0 - y1| >= 1 to make sure cell[0] and cell[1] don't overlap.
     // // DBG("Setting constraints..\n");
     // for (i0 = 0; i0 < m_arraySizeY; i0++) {
@@ -644,10 +759,10 @@ void MacroPlacer::run3() {
         // set additional constraints on relative position.
         for (i = 0; i < m_arraySizeY; i++) {
             for (j = 0; j < m_arraySizeX; j++) {
-                // if (m_relativeConstraintX && j < m_arraySizeX - 1) {
-                //     s = "const_relativeX_" + std::to_string(i) + "_" + std::to_string(j);
-                //     model.addConstr(x[i][j] <= x[i][j+1], s);
-                // }
+                if (m_relativeConstraintX && j < m_arraySizeX - 1) {
+                    s = "const_relativeX_" + std::to_string(i) + "_" + std::to_string(j);
+                    model.addConstr(y[i][j] + 1 <= y[i][j+1], s);
+                }
                 if (i < m_arraySizeY - 1) {
                     s = "const_relativeY_" + std::to_string(i) + "_" + std::to_string(j);
                     model.addConstr(y[i][j] + 1 <= y[i+1][j], s);
