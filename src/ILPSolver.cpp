@@ -565,7 +565,6 @@ void MacroPlacer::run3() {
     // Add decision variables.
     
     // DBG("Adding variables..\n");
-    // GRBVar x[m_arraySizeY][m_arraySizeX]; 
     GRBVar y[m_arraySizeY][m_arraySizeX]; 
     
     // // dx[i0][j0][i1][j1] = x[i0][j0] - x[i1][j1]
@@ -627,7 +626,6 @@ void MacroPlacer::run3() {
     GRBVar dyAbs[m_arraySizeY][m_arraySizeX][m_arraySizeY][m_arraySizeX];
 
     GRBVar bList[m_arraySizeY][m_arraySizeX][m_arraySizeY][m_arraySizeX][2];
-    // GRBVar b1[m_arraySizeY][m_arraySizeX][m_arraySizeY][m_arraySizeX];
     GRBVar b[m_arraySizeY][m_arraySizeX][m_arraySizeY][m_arraySizeX];
 
     // Add the NOC and ROC is enabled. 
@@ -713,66 +711,7 @@ void MacroPlacer::run3() {
         }
     } 
 
-
-
-    // // |x0 - x1| + |y0 - y1| >= 1 to make sure cell[0] and cell[1] don't overlap.
-    // // DBG("Setting constraints..\n");
-    // for (i0 = 0; i0 < m_arraySizeY; i0++) {
-    //     for (j0 = 0; j0 < m_arraySizeX; j0++) {
-    //         for (i1 = i0; i1 < m_arraySizeY; i1++) {
-    //             for (j1 = 0; j1 < m_arraySizeX; j1++) {
-                    
-    //                 if (i0 == i1 && j0 >= j1) {
-    //                     continue;
-    //                 }
-                    
-    //                 s_index = "[" + std::to_string(i0) + "][" + std::to_string(j0) + "]_["
-    //                     + std::to_string(i1) + "][" + std::to_string(j1) + "]";
-
-    //                 // dx[i0][j0][i1][j1] = model.addVar(-GRB_INFINITY, GRB_INFINITY, 0, GRB_INTEGER, "dx" + s_index);
-    //                 // model.addConstr(dx[i0][j0][i1][j1] == x[i0][j0] - x[i1][j1], "constr_dx" + s_index);
-
-    //                 // DBG("AddVar: absDx[%d][%d][%d][%d]\n", i0, j0, i1, j1);
-    //                 absDx[i0][j0][i1][j1] = model.addVar(0, GRB_INFINITY, 0, GRB_INTEGER, "absDx" + s_index);
-    //                 model.addGenConstrAbs(absDx[i0][j0][i1][j1], dx[i0][j0][i1][j1], "constr_absDx" + s_index);
-
-    //                 dy[i0][j0][i1][j1] = model.addVar(-GRB_INFINITY, GRB_INFINITY, 0, GRB_INTEGER, "dy" + s_index);
-    //                 model.addConstr(dy[i0][j0][i1][j1] == y[i0][j0] - y[i1][j1], "constr_dy" + s_index);
-
-    //                 // DBG("AddVar: absDy[%d][%d][%d][%d]\n", i0, j0, i1, j1);
-    //                 absDy[i0][j0][i1][j1] = model.addVar(0, GRB_INFINITY, 0, GRB_INTEGER, "absDy" + s_index);
-    //                 model.addGenConstrAbs(absDy[i0][j0][i1][j1], dy[i0][j0][i1][j1], "constr_absDy" + s_index);
-
-    //                 model.addConstr(absDx[i0][j0][i1][j1] + absDy[i0][j0][i1][j1] >= 1, "no_overlap" + s_index);
-
-
-    //             }
-    //         }
-    //     }
-    // } 
-
-
-    // // if (m_relativeConstraintX || m_relativeConstraintY) {
-    // if (true) {
-    //     // set additional constraints on relative position.
-    //     for (i = 0; i < m_arraySizeY; i++) {
-    //         for (j = 0; j < m_arraySizeX; j++) {
-    //             if (m_relativeConstraintX && j < m_arraySizeX - 1) {
-    //                 s = "const_relativeX_" + std::to_string(i) + "_" + std::to_string(j);
-    //                 model.addConstr(y[i][j] + 1 <= y[i][j+1], s);
-    //             }
-    //             if (i < m_arraySizeY - 1) {
-    //                 s = "const_relativeY_" + std::to_string(i) + "_" + std::to_string(j);
-    //                 model.addConstr(y[i][j] + 1 <= y[i+1][j], s);
-    //             }
-    //         }
-    //     }
-    // }
-
-
     // DBG("Setting Objective..\n");
-    // objective
-
     GRBLinExpr objTotalWl = 0;
 
     // When relative constraints are satisfied, total WL only depends on the coordinates of the cells on the boundaries of the PE array.
@@ -796,23 +735,16 @@ void MacroPlacer::run3() {
         j = m_arraySizeX - 1;
         objTotalWl += y[i][j];
     }
-    // objTotalWl += y[0][0];
 
-    // Set cell[0][0] to the lower-left corner if possible.
-    // objTotalWl += 0.01 * (x[0][0] + y[0][0]);
-
-    printf("Setting Objective..\n");
+    // printf("Setting Objective..\n");
     try {
         model.setObjective(objTotalWl, GRB_MINIMIZE);
-        printf("Setting Objective..\n");
+        // printf("Setting Objective..\n");
         // assert(0);
     } catch (GRBException e) {
         printf("%s\n", e.getMessage().c_str());
     }
-
-    // model.setObjective(objTotalWl, GRB_MINIMIZE);
-
-    printf("Solve model..\n");
+    // printf("Solve model..\n");
 
     model.optimize();
 
@@ -849,109 +781,7 @@ void MacroPlacer::runBatch() {
     setRelativeConstraintXY(1, 1);
     setXYWeight(1, 1);
 
-    // setProblemSize(5, 5, 25, 3); 
-    // run2();
-
-    // setProblemSize(5, 5, 25, 2); 
-    // run2();
-
-    // Try this:
-    // setProblemSize(5, 3, 15, 2);
-    // run2();
-
-    // setProblemSize(6, 3, 15, 2);
-    // run2();
-
-    // setProblemSize(7, 3, 20, 2);
-    // run2();
-
     setProblemSize(8, 3, 20, 2);
-    run2();
-
-    // setXYWeight(2, 1);
-    // run2();
-
-    // setXYWeight(4, 1);
-    // run2();
-
-    // setXYWeight(8, 1);
-    // run2();
-
-    // setProblemSize(6, 4, 24, 3); 
-
-    // setXYWeight(1, 1);
-    // run2();
-
-    // setXYWeight(2, 1);
-    // run2();
-
-    // setXYWeight(4, 1);
-    // run2();
-
-    // setXYWeight(8, 1);
-    // run2();
-
-
-    // setProblemSize(5, 3, 15, 2); 
-    // run2();
-    // setProblemSize(3, 3, 5, 2); 
-    // run2();
-    // setProblemSize(3, 3, 5, 3); 
-    // run2();
-    // setProblemSize(6, 3, 20, 2); 
-    // run2();
-
-    // setProblemSize(4, 4, 20, 1); 
-    // run2();
-    // setProblemSize(4, 4, 10, 2); 
-    // run2();
-    // setProblemSize(4, 4, 10, 4); 
-    // run2();
-    // setProblemSize(4, 4, 10, 3); 
-    // run2();
-
-    // setProblemSize(5, 4, 10, 3); 
-    // run();
-    // // run2();
-    // setProblemSize(6, 4, 12, 3); 
-    // run();
-    // run2();
-    // setProblemSize(7, 4, 15, 3); 
-    // run2();
-    // run2();
-    // setProblemSize(8, 4, 20, 3); 
-    // run2();
-
-
-    // setProblemSize(5, 5, 25, 1); 
-    // run2();
-    // setProblemSize(5, 5, 15, 2); 
-    // run2();
-    // setProblemSize(5, 5, 10, 3); 
-    // run2();
-
-    // setProblemSize(5, 5, 10, 4); 
-    // run2();
-    // setProblemSize(5, 5, 8, 5); 
-    // run2();
-
-    return;
-
-    setProblemSize(8, 8, 80, 1); 
-    run2();
-    setProblemSize(8, 8, 40, 2); 
-    run2();
-    setProblemSize(8, 8, 30, 3); 
-    run2();
-    setProblemSize(8, 8, 20, 4); 
-    run2();
-    setProblemSize(8, 8, 20, 5); 
-    run2();
-    setProblemSize(8, 8, 20, 6); 
-    run2();
-    setProblemSize(8, 8, 20, 7); 
-    run2();
-    setProblemSize(8, 8, 20, 8); 
     run2();
 }
 

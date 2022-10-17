@@ -45,6 +45,8 @@ public:
 
     };
 
+    struct 
+
     // For trials using ILP.
     void    setProblemSize(int arraySizeY, int arraySizeX, int siteSizeY, int sizeSizeX); // TBF
     void    setXYWeight(int weightX, int weightY);
@@ -55,6 +57,7 @@ public:
     void    run();
     void    run2();
     void    run3();
+    void    run4();
     void    runBatch();
     void    runBatchFromFile(const std::string batchFileName);
     void    runJobs();
