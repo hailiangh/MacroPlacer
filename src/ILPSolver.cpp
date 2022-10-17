@@ -630,7 +630,7 @@ void MacroPlacer::run3() {
     // GRBVar b1[m_arraySizeY][m_arraySizeX][m_arraySizeY][m_arraySizeX];
     GRBVar b[m_arraySizeY][m_arraySizeX][m_arraySizeY][m_arraySizeX];
 
-    // Add the NOC. 
+    // Add the NOC and ROC is enabled. 
     for (i0 = 0; i0 < m_arraySizeY; i0++) {
         for (j0 = 0; j0 < m_arraySizeX; j0++) {
             for (i1 = i0; i1 < m_arraySizeY; i1++) {
@@ -706,8 +706,6 @@ void MacroPlacer::run3() {
                             printf("ERR: Unexpected NOCMode: %d.\n", NOCMode);
                             // assert(false);
                         }
-
-
                     }
 
                 }
@@ -754,22 +752,22 @@ void MacroPlacer::run3() {
     // } 
 
 
-    // if (m_relativeConstraintX || m_relativeConstraintY) {
-    if (true) {
-        // set additional constraints on relative position.
-        for (i = 0; i < m_arraySizeY; i++) {
-            for (j = 0; j < m_arraySizeX; j++) {
-                if (m_relativeConstraintX && j < m_arraySizeX - 1) {
-                    s = "const_relativeX_" + std::to_string(i) + "_" + std::to_string(j);
-                    model.addConstr(y[i][j] + 1 <= y[i][j+1], s);
-                }
-                if (i < m_arraySizeY - 1) {
-                    s = "const_relativeY_" + std::to_string(i) + "_" + std::to_string(j);
-                    model.addConstr(y[i][j] + 1 <= y[i+1][j], s);
-                }
-            }
-        }
-    }
+    // // if (m_relativeConstraintX || m_relativeConstraintY) {
+    // if (true) {
+    //     // set additional constraints on relative position.
+    //     for (i = 0; i < m_arraySizeY; i++) {
+    //         for (j = 0; j < m_arraySizeX; j++) {
+    //             if (m_relativeConstraintX && j < m_arraySizeX - 1) {
+    //                 s = "const_relativeX_" + std::to_string(i) + "_" + std::to_string(j);
+    //                 model.addConstr(y[i][j] + 1 <= y[i][j+1], s);
+    //             }
+    //             if (i < m_arraySizeY - 1) {
+    //                 s = "const_relativeY_" + std::to_string(i) + "_" + std::to_string(j);
+    //                 model.addConstr(y[i][j] + 1 <= y[i+1][j], s);
+    //             }
+    //         }
+    //     }
+    // }
 
 
     // DBG("Setting Objective..\n");
@@ -795,24 +793,26 @@ void MacroPlacer::run3() {
         j = 0;
         objTotalWl -= y[i][j];
 
-        j = m_arraySizeX;
+        j = m_arraySizeX - 1;
         objTotalWl += y[i][j];
     }
+    // objTotalWl += y[0][0];
 
     // Set cell[0][0] to the lower-left corner if possible.
     // objTotalWl += 0.01 * (x[0][0] + y[0][0]);
 
-    // DBG("Setting Objective..\n");
+    printf("Setting Objective..\n");
     try {
         model.setObjective(objTotalWl, GRB_MINIMIZE);
+        printf("Setting Objective..\n");
         // assert(0);
     } catch (GRBException e) {
-        // DBG("%s\n", e.getMessage().c_str());
+        printf("%s\n", e.getMessage().c_str());
     }
 
     // model.setObjective(objTotalWl, GRB_MINIMIZE);
 
-    // DBG("Solve model..\n");
+    printf("Solve model..\n");
 
     model.optimize();
 
