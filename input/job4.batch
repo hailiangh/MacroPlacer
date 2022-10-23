@@ -1,0 +1,7 @@
+# This file specify the jobs in batch mode.
+# Each job is listed in one line, with properties in each columns separated by space " ".
+# JobType, arraySizeY, arraySizeX, siteSizeY, siteSizeX, weightX, weightY, relativeConstraintX, relativeConstraintY, timeLimit(seconds).
+job4 6 6 36 1 1 1 1 1 600
+job4 5 5 25 1 1 1 1 1 600
+job4 4 4 16 1 1 1 1 1 60
+job4 3 3 9 1 1 1 1 1 60

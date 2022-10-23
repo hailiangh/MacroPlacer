@@ -45,8 +45,6 @@ public:
 
     };
 
-    struct 
-
     // For trials using ILP.
     void    setProblemSize(int arraySizeY, int arraySizeX, int siteSizeY, int sizeSizeX); // TBF
     void    setXYWeight(int weightX, int weightY);
