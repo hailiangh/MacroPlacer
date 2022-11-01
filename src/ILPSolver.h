@@ -63,6 +63,7 @@ public:
     // DSP placement prior to global placement.
     void    placeAndFixDSP();
 
+    void    dbg_printProblemInfo();
 
 
 

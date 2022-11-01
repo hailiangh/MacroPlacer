@@ -238,126 +238,25 @@ void MacroPlacer::setTimeLimit(double timeLimit) {
  * 
  */
 void MacroPlacer::run() {
-    // // DVD();
-    // // DBG("%s.\n", __func__);
+    printf("%s.\n", __func__);
+    dbg_printProblemInfo();
+
     
-    // GRBEnv env = GRBEnv();
-    // GRBModel model = GRBModel(env);
-
-    // // Add decision variables.
-    
-    // // x[i][j][k][p] == 1 means cell[i][j] is assigned to site[k][p]. 
-
-    // // DBG("Adding variables..\n");
-    // GRBVar x[m_arraySizeY][m_arraySizeX][m_siteSizeY][m_siteSizeX]; 
-
-    // int i, j, m, n;
-    // std::string s;
-    // for (i = 0; i < m_arraySizeY; i++) {
-    //     for (j = 0; j < m_arraySizeX; j++) {
-    //         for (m = 0; m < m_siteSizeY; m++) {
-    //             for (n = 0; n < m_siteSizeX; n++) {
-    //                 s = "cell[" + std::to_string(i) + "][" + std::to_string(j) + "]2site[" + std::to_string(m) + "][" + std::to_string(n) + "]";
-    //                 x[i][j][m][n] = model.addVar(0, 1, 0, GRB_BINARY, s);
-    //             }
-    //         }
-    //     }
-    // }
-
-    // // Add constraints.
-    // // DBG("Adding constraints..\n");
-
-    // // // x0 <= x1, y0 <= y1 to remove mirrored solutions.
-    // // model.addConstr(x[0][0] <= x[m_arraySizeY-1][m_arraySizeX-1], "no_mirror_x");
-    // // model.addConstr(y[0][0] <= y[m_arraySizeY-1][m_arraySizeX-1], "no_mirror_y");
-
-    // // For each cell, it only get assigned to one site.
-    
-    // for (i = 0; i < m_arraySizeY; i++) {
-    //     for (j = 0; j < m_arraySizeX; j++) {
-    //         GRBLinExpr expr = 0;
-    //         for (m = 0; m < m_siteSizeY; m++) {
-    //             for (n = 0; n < m_siteSizeX; n++) {
-    //                 expr += x[i][j][m][n];
-    //             }
-    //         }
-    //         s = "cnstr_cell[" + std::to_string(i) + "][" + std::to_string(j) + "]"; 
-    //         model.addConstr(expr == 1.0, s);
-    //     }
-    // }
-
-    // // For each site, at most one cell get assigned to it.
-
-    // for (m = 0; m < m_siteSizeY; m++) {
-    //     for (n = 0; n < m_siteSizeX; n++) {
-    //         GRBLinExpr expr = 0;
-    //         for (i = 0; i < m_arraySizeY; i++) {
-    //             for (j = 0; j < m_arraySizeX; j++) {
-    //                 expr += x[i][j][m][n];
-    //             }
-    //         }
-    //         s = "cnstr_site[" + std::to_string(m) + "][" + std::to_string(n) + "]"; 
-    //         model.addConstr(expr <= 1.0, s);
-    //     }
-    // }
-    
-    // // Set objectives.
-
-    // int m0, m1, n0, n1, i0, i1, j0, j1;
-    // GRBQuadExpr obj = 0;
-    // for (i0 = 0; i0 < m_arraySizeY; i0++) {
-    //     for (j0 = 0; j0 < m_arraySizeX; j0++) {
-    //         // For each cell[i0][j0].
-
-    //         for (i1 = 0; i1 < m_arraySizeY; i1++) {
-    //             for (j1 = 0; j1 < m_arraySizeX; j1++) {
-    //                 // For each cell[i1][j1].
-
-    //                 // If cell[0] is connected with cell[1], then add the net length into the objective.
-
-    //                 if (isConnected(i0, j0, i1, j1)) {
-
-    //                     for (m0 = 0; m0 < m_siteSizeY; m0++) {
-    //                         for (n0 = 0; n0 < m_siteSizeX; n0++) {
-    //                             // For each site[m0][n0].
-
-    //                             for (m1 = 0; m1 < m_siteSizeY; m1++) {
-    //                                 for (n1 = 0; n1 < m_siteSizeX; n1++) {
-    //                                     // For each site[m1][n1].
-
-    //                                     // Calculate the distance of the two sites. (Net Length)
-    //                                     int dist = manhDist(n0, m0, n1, m1);
-    //                                     // Add into the obj.
-    //                                     obj += 0.5 * dist * x[i0][j0][m0][n0] * x[i1][j1][m1][n1];
-                                        
-    //                                 }
-    //                             }
-
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-
-    //     }
-    // }
-
-    // model.setObjective(obj, GRB_MINIMIZE);
-
-    // // DBG("Optimize model..\n");
-    // model.optimize();
-
-    // DBG("Writing model..\n");
-    // std::string fileName = "ILPSol/macroPl_" + std::to_string(m_arraySizeY) + "_" + std::to_string(m_arraySizeX) 
-    //                         + "_to_" + std::to_string(m_siteSizeY) + "_" + std::to_string(m_siteSizeX) + "_run1"; 
-    // try {
-    //     model.write(fileName + ".sol");
-    //     DBG("Solution written to %s\n", fileName.c_str());
-    // } catch (GRBException e) {
-    //     DBG("%s\n", e.getMessage().c_str());
-    // }
 
     // DVD();
+}
+
+/**
+ * @brief Print the information of the problem.
+ * 
+ */
+void MacroPlacer::dbg_printProblemInfo() {
+    printf("%s.\n", __func__);
+    printf("|Problem size: mapping %d x %d => %d x %d \n", m_arraySizeY, m_arraySizeX, m_siteSizeY, m_siteSizeX);
+    printf("|weight x = %d, weight y = %d\n", m_weightX, m_weightY);
+    printf("|relative ordering in X direction:%d\n", m_relativeConstraintX);
+    printf("|relative ordering in Y direction:%d\n", m_relativeConstraintY);
+    printf("-----------------------------------------------------\n");
 }
 
 /**
