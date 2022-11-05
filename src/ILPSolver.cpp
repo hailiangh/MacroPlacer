@@ -943,14 +943,13 @@ void MacroPlacer::runBatchFromFile(const std::string batchFileName) {
     while (read_line_as_tokens(fs, tokens)) {
         // Skip lines starting with "#".
         if (strncmp(tokens[0].c_str(), "#", 1) == 0) {
-        // if (strcmp(tokens[0], "#") == 0) {
             continue;
         }
-        else if (tokens.size() == 9) {
-            m_jobList.emplace_back(tokens[0],stoi(tokens[1]),stoi(tokens[2]),stoi(tokens[3]),stoi(tokens[4]),stod(tokens[5]),stod(tokens[6]),stoi(tokens[7]),stoi(tokens[8]));
-        }
-        else if (tokens.size() == 10) {
-            m_jobList.emplace_back(tokens[0],stoi(tokens[1]),stoi(tokens[2]),stoi(tokens[3]),stoi(tokens[4]),stod(tokens[5]),stod(tokens[6]),stoi(tokens[7]),stoi(tokens[8]), stod(tokens[9]));
+        // else if (tokens.size() == 9) {
+        //     m_jobList.emplace_back(tokens[0],stoi(tokens[1]),stoi(tokens[2]),stoi(tokens[3]),stoi(tokens[4]),stod(tokens[5]),stod(tokens[6]),stoi(tokens[7]),stoi(tokens[8]));
+        // }
+        else if (tokens.size() == 11) {
+            m_jobList.emplace_back(tokens[0],stoi(tokens[1]),stoi(tokens[2]),stoi(tokens[3]),stoi(tokens[4]),stod(tokens[5]),stod(tokens[6]),stoi(tokens[7]),stoi(tokens[8]), stod(tokens[9]), stoi(tokens[10]));
         }
         else {
             printf("ERR: Unexpected input length: %d", tokens.size());
@@ -977,17 +976,26 @@ void MacroPlacer::runJobs() {
         printf("--------------------------------\n");
         printf("Run Job [%s]..\n", job.name.c_str());
 
-        if (job.siteSizeX == 1) {
-            if (job.name == "job4") {
-                run4();
+        if (job.method == 0) {
+            // Heuristic method.
+            run();
+        }
+        else if (job.method == 1) {
+            // Gurobi.
+            if (job.siteSizeX == 1) {
+                if (job.name == "job4") {
+                    run4();
+                }
+                else {
+                    run3();
+                }
             }
             else {
-                run3();
+                run2();
             }
         }
-        else {
-            run2();
-        }
+
+
 
         printf("--------------------------------\n");
 

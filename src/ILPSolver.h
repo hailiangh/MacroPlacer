@@ -4,15 +4,11 @@
 #include "gurobi_c++.h"
 
 
-
- 
 class ILPSolver
 {    
 public:
     int exampleGurobiOptimization();
     int exampleMipGurobi();
-
-
 };
 
 
@@ -24,13 +20,13 @@ public:
     // {}
     // MacroPlacer ();
     struct JOB {
-        JOB(const std::string name, int arrSzY, int arrSzX, int stSzY, int stSzX, int wtX, int wtY, bool rltCstrX, bool rltCstrY) :
-            name(name), arraySizeY(arrSzY), arraySizeX(arrSzX), siteSizeY(stSzY), siteSizeX(stSzX), 
-            weightX(wtX), weightY(wtY), relativeConstraintX(rltCstrX), relativeConstraintY(rltCstrY) {}
+        // JOB(const std::string name, int arrSzY, int arrSzX, int stSzY, int stSzX, int wtX, int wtY, bool rltCstrX, bool rltCstrY) :
+        //     name(name), arraySizeY(arrSzY), arraySizeX(arrSzX), siteSizeY(stSzY), siteSizeX(stSzX), 
+        //     weightX(wtX), weightY(wtY), relativeConstraintX(rltCstrX), relativeConstraintY(rltCstrY) {}
 
-        JOB(const std::string name, int arrSzY, int arrSzX, int stSzY, int stSzX, int wtX, int wtY, bool rltCstrX, bool rltCstrY, double timeLimit) :
+        JOB(const std::string name, int arrSzY, int arrSzX, int stSzY, int stSzX, int wtX, int wtY, bool rltCstrX, bool rltCstrY, double timeLimit, int method) :
             name(name), arraySizeY(arrSzY), arraySizeX(arrSzX), siteSizeY(stSzY), siteSizeX(stSzX), 
-            weightX(wtX), weightY(wtY), relativeConstraintX(rltCstrX), relativeConstraintY(rltCstrY), timeLimit(timeLimit) {}
+            weightX(wtX), weightY(wtY), relativeConstraintX(rltCstrX), relativeConstraintY(rltCstrY), timeLimit(timeLimit), method(method) {}
 
         std::string     name;
         int             arraySizeY;
@@ -42,6 +38,8 @@ public:
         bool            relativeConstraintX = 0;
         bool            relativeConstraintY = 0;
         double          timeLimit = -1;
+
+        int             method = -1; // -1: invalid; 0: Heuristic method; 1: Gurobi; 
 
     };
 

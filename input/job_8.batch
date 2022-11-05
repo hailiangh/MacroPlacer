@@ -1,7 +1,0 @@
-# This file specify the jobs in batch mode.
-# Each job is listed in one line, with properties in each columns separated by space " ".
-# JobName, arraySizeY, arraySizeX, siteSizeY, siteSizeX, weightX, weightY, relativeConstraintX, relativeConstraintY.
-job0 8 8 64 1 36 1 1 1 1800
-job0 8 8 64 1 37 1 1 1 3600
-job0 8 8 64 1 38 1 1 1 7200
-job0 8 8 64 1 39 1 1 1 36000
