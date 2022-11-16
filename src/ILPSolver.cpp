@@ -432,6 +432,9 @@ void MacroPlacer::run2() {
     // Weights in X/Y direction.
     fileName += "_wtXY_" + std::to_string(m_weightX) + "_" + std::to_string(m_weightY);
 
+    // Time Limit.
+    fileName += "_time_" + std::to_string(m_timeLimit);
+
     try {
         model.write(fileName + ".sol");
         // DBG("Solution written to %s\n", fileName.c_str());
