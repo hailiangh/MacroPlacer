@@ -240,9 +240,6 @@ void MacroPlacer::setTimeLimit(double timeLimit) {
 void MacroPlacer::run() {
     printf("%s.\n", __func__);
     dbg_printProblemInfo();
-
-    
-
     // DVD();
 }
 
@@ -256,6 +253,7 @@ void MacroPlacer::dbg_printProblemInfo() {
     printf("|weight x = %d, weight y = %d\n", m_weightX, m_weightY);
     printf("|relative ordering in X direction:%d\n", m_relativeConstraintX);
     printf("|relative ordering in Y direction:%d\n", m_relativeConstraintY);
+    printf("|TimeLimit: %f\n", m_timeLimit);
     printf("-----------------------------------------------------\n");
 }
 
@@ -264,19 +262,18 @@ void MacroPlacer::dbg_printProblemInfo() {
  * 
  */
 void MacroPlacer::run2() {
-    // DVD();
-    // DBG("%s.\n", __func__);
-    // DBG("Problem size: mapping %d x %d => %d x %d \n", m_arraySizeY, m_arraySizeX, m_siteSizeY, m_siteSizeX);
-    printf("Problem size: mapping %d x %d => %d x %d \n", m_arraySizeY, m_arraySizeX, m_siteSizeY, m_siteSizeX);
+    printf("run2() Problem size: mapping %d x %d => %d x %d \n", m_arraySizeY, m_arraySizeX, m_siteSizeY, m_siteSizeX);
+    dbg_printProblemInfo();
     
     GRBEnv env = GRBEnv();
     GRBModel model = GRBModel(env);
 
     // Set time limit.
+    printf("set time limit");
     if (m_timeLimit > 0) {
         model.set(GRB_DoubleParam_TimeLimit, m_timeLimit);
     }
-    model.set(GRB_DoubleParam_NoRelHeurTime, m_timeLimit * 0.8);
+    model.set(GRB_DoubleParam_NoRelHeurTime, m_timeLimit * 0.99);
 
     // Add decision variables.
     
@@ -314,8 +311,8 @@ void MacroPlacer::run2() {
     }
 
     // x0 <= x1, y0 <= y1 to remove mirrored solutions.
-    model.addConstr(x[0][0] <= x[m_arraySizeY-1][m_arraySizeX-1], "no_mirror_x");
-    model.addConstr(y[0][0] <= y[m_arraySizeY-1][m_arraySizeX-1], "no_mirror_y");
+    // model.addConstr(x[0][0] <= x[m_arraySizeY-1][m_arraySizeX-1], "no_mirror_x");
+    // model.addConstr(y[0][0] <= y[m_arraySizeY-1][m_arraySizeX-1], "no_mirror_y");
 
 
     // |x0 - x1| + |y0 - y1| >= 1 to make sure cell[0] and cell[1] don't overlap.
@@ -347,7 +344,6 @@ void MacroPlacer::run2() {
                     model.addGenConstrAbs(absDy[i0][j0][i1][j1], dy[i0][j0][i1][j1], "constr_absDy" + s_index);
 
                     model.addConstr(absDx[i0][j0][i1][j1] + absDy[i0][j0][i1][j1] >= 1, "no_overlap" + s_index);
-
 
                 }
             }
@@ -403,22 +399,28 @@ void MacroPlacer::run2() {
     }
 
     // Set cell[0][0] to the lower-left corner if possible.
-    objTotalWl += 0.01 * (x[0][0] + y[0][0]);
+    // objTotalWl += 0.01 * (x[0][0] + y[0][0]);
 
     // DBG("Setting Objective..\n");
+    printf("set objective");
     try {
         model.setObjective(objTotalWl, GRB_MINIMIZE);
         // assert(0);
     } catch (GRBException e) {
         // DBG("%s\n", e.getMessage().c_str());
+        printf("Exception message: %s.\n", e.getMessage().c_str());
     }
 
     // model.setObjective(objTotalWl, GRB_MINIMIZE);
 
     // DBG("Solve model..\n");
-
-    model.optimize();
-
+    try {
+        printf("optimize()");
+        model.optimize();
+    } catch (GRBException e) {
+        printf("Exception message: %s.\n", e.getMessage().c_str());
+    }
+    
     // DBG("Optimize() done.\n");
     // DVD();
 
@@ -439,6 +441,7 @@ void MacroPlacer::run2() {
         model.write(fileName + ".sol");
         // DBG("Solution written to %s\n", fileName.c_str());
     } catch (GRBException e) {
+        printf("Exception message: %s.\n", e.getMessage().c_str());
         // DBG("%s\n", e.getMessage().c_str());
     }
     // model.write(fileName + "pl");
@@ -451,7 +454,7 @@ void MacroPlacer::run2() {
  * 
  */
 void MacroPlacer::run3() {
-    printf("Problem size: mapping %d x %d => %d x %d \n", m_arraySizeY, m_arraySizeX, m_siteSizeY, m_siteSizeX);
+    printf("run3() Problem size: mapping %d x %d => %d x %d \n", m_arraySizeY, m_arraySizeX, m_siteSizeY, m_siteSizeX);
     if (m_siteSizeX != 1) {
         printf("WRN: %s is only used for mapping into one column! Function stops.\n", __func__);
         return;
@@ -684,7 +687,7 @@ void MacroPlacer::run3() {
  * 
  */
 void MacroPlacer::run4() {
-    printf("Problem size: mapping %d x %d => %d x %d \n", m_arraySizeY, m_arraySizeX, m_siteSizeY, m_siteSizeX);
+    printf("run 4() Problem size: mapping %d x %d => %d x %d \n", m_arraySizeY, m_arraySizeX, m_siteSizeY, m_siteSizeX);
     bool enTop = 1;
     bool enBot = 0;
     bool enRight = 1;
@@ -888,7 +891,7 @@ void MacroPlacer::run4() {
         // printf("Setting Objective..\n");
         // assert(0);
     } catch (GRBException e) {
-        printf("%s\n", e.getMessage().c_str());
+        printf("setObjective: %s\n", e.getMessage().c_str());
     }
     // printf("Solve model..\n");
 
@@ -948,9 +951,6 @@ void MacroPlacer::runBatchFromFile(const std::string batchFileName) {
         if (strncmp(tokens[0].c_str(), "#", 1) == 0) {
             continue;
         }
-        // else if (tokens.size() == 9) {
-        //     m_jobList.emplace_back(tokens[0],stoi(tokens[1]),stoi(tokens[2]),stoi(tokens[3]),stoi(tokens[4]),stod(tokens[5]),stod(tokens[6]),stoi(tokens[7]),stoi(tokens[8]));
-        // }
         else if (tokens.size() == 11) {
             m_jobList.emplace_back(tokens[0],stoi(tokens[1]),stoi(tokens[2]),stoi(tokens[3]),stoi(tokens[4]),stod(tokens[5]),stod(tokens[6]),stoi(tokens[7]),stoi(tokens[8]), stod(tokens[9]), stoi(tokens[10]));
         }
@@ -959,6 +959,8 @@ void MacroPlacer::runBatchFromFile(const std::string batchFileName) {
         }
     }
     printf("Job size: %d\n", m_jobList.size());
+    printf("--------------------------------\n");
+    
 
     fs.close();
 
@@ -996,6 +998,10 @@ void MacroPlacer::runJobs() {
             else {
                 run2();
             }
+        }
+        // This is for when relative constraints is removed.
+        else if (job.method == 2) {
+            run2();
         }
 
 

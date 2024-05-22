@@ -1,0 +1,15 @@
+# This file specify the jobs in batch mode.
+# Each job is listed in one line, with properties in each columns separated by space " ".
+# JobName, arraySizeY, arraySizeX, siteSizeY, siteSizeX, weightX, weightY, relativeConstraintX, relativeConstraintY, timeLimit(in seconds, -1 for no limit), method (0: heuristic, 1: Gurobi).
+
+job 8 8 64 1 10 1 0 0 3600 2
+job 8 8 64 1 9  1 0 0 3600 2
+job 8 8 64 1 8 1 0 0 3600 2
+job 8 8 64 1 7 1 0 0 3600 2
+job 8 8 64 1 6 1 0 0 3600 2
+job 8 8 64 1 5 1 0 0 3600 2
+job 8 8 64 1 4 1 0 0 3600 2
+job 8 8 64 1 3 1 0 0 3600 2
+job 8 8 64 1 2 1 0 0 3600 2
+job 8 8 64 1 1 1 0 0 3600 2
+

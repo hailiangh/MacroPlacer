@@ -39,7 +39,7 @@ public:
         bool            relativeConstraintY = 0;
         double          timeLimit = -1;
 
-        int             method = -1; // -1: invalid; 0: Heuristic method; 1: Gurobi; 
+        int             method = -1; // -1: invalid; 0: Heuristic method; 1: Gurobi; 2: Gurobi w/o relativeConst;
 
     };
 
