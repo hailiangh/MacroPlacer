@@ -41,7 +41,7 @@ $(BINARY): $(OBJECTS)
 
 # This works on CESG Sever (ecesvj10101.ece.tamu.edu)
 oneline:
-	g++ -m64 -g -o $(BINARY) src/main.cpp src/ILPSolver.cpp -I$(GUROBIINC) -L$(GUROBILIB)
+	g++ -m64 -g -o $(BINARY) src/main.cpp src/ILPSolver.cpp -I$(GUROBIINC) -L$(GUROBILIB) -O3
  
 
 clean:
