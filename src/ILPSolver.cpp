@@ -233,6 +233,10 @@ void MacroPlacer::setTimeLimit(double timeLimit) {
     m_timeLimit = timeLimit;
 }
 
+void MacroPlacer::setInitSolFileName(const std::string initSolFileName) {
+    m_initSolFileName = initSolFileName;
+}
+
 /**
  * @brief Entry function of the macro placer.
  * 
@@ -254,6 +258,7 @@ void MacroPlacer::dbg_printProblemInfo() {
     printf("|relative ordering in X direction:%d\n", m_relativeConstraintX);
     printf("|relative ordering in Y direction:%d\n", m_relativeConstraintY);
     printf("|TimeLimit: %f\n", m_timeLimit);
+    printf("|Initial solution file: %s\n", m_initSolFileName.c_str());
     printf("-----------------------------------------------------\n");
 }
 
@@ -278,6 +283,7 @@ void MacroPlacer::run2() {
     // Add decision variables.
     
     // DBG("Adding variables..\n");
+    printf("Start Adding variables..\n");
     GRBVar x[m_arraySizeY][m_arraySizeX]; 
     GRBVar y[m_arraySizeY][m_arraySizeX]; 
     
@@ -301,6 +307,7 @@ void MacroPlacer::run2() {
     // 0 <= xi <= m_siteSizeX.
     // 0 <= yi <= m_siteSizeY.
 
+    printf("Adding variables..\n");
     for (i = 0; i < m_arraySizeY; i++) {
         for (j = 0; j < m_arraySizeX; j++) {
             s = "X_" + std::to_string(i) + "_" + std::to_string(j);
@@ -317,6 +324,7 @@ void MacroPlacer::run2() {
 
     // |x0 - x1| + |y0 - y1| >= 1 to make sure cell[0] and cell[1] don't overlap.
     // DBG("Setting constraints..\n");
+    printf("Setting constraints..\n");
     for (i0 = 0; i0 < m_arraySizeY; i0++) {
         for (j0 = 0; j0 < m_arraySizeX; j0++) {
             for (i1 = i0; i1 < m_arraySizeY; i1++) {
@@ -352,6 +360,7 @@ void MacroPlacer::run2() {
 
 
     if (m_relativeConstraintX || m_relativeConstraintY) {
+        printf("Adding relative constraints..\n");
         // set additional constraints on relative position.
         for (i = 0; i < m_arraySizeY; i++) {
             for (j = 0; j < m_arraySizeX; j++) {
@@ -366,6 +375,37 @@ void MacroPlacer::run2() {
             }
         }
     }
+
+    // Add initial solution if available.
+    // Initial solution is a file with the format:
+    // X i j value or Y i j value
+    // where it means x[i][j] = value or y[i][j] = value.
+    if (m_initSolFileName != "") {
+        printf("Adding initial solution from %s\n", m_initSolFileName.c_str());
+        std::ifstream file(m_initSolFileName);
+        if (file.is_open()) {
+            std::string line;
+            std::vector<std::string> tokens;
+            while (read_line_as_tokens(file, tokens)) {
+                if (tokens.size() == 4) {
+                    if (tokens[0] == "X") {
+                        i = std::stoi(tokens[1]);
+                        j = std::stoi(tokens[2]);
+                        x[i][j].set(GRB_DoubleAttr_Start, std::stod(tokens[3]));
+                    }
+                    else if (tokens[0] == "Y") {
+                        i = std::stoi(tokens[1]);
+                        j = std::stoi(tokens[2]);
+                        y[i][j].set(GRB_DoubleAttr_Start, std::stod(tokens[3]));
+                    }
+                }
+            }
+        }
+    }
+    else {
+        printf("No initial solution file provided.\n");
+    }
+                    
 
 
     // DBG("Setting Objective..\n");
@@ -402,7 +442,7 @@ void MacroPlacer::run2() {
     // objTotalWl += 0.01 * (x[0][0] + y[0][0]);
 
     // DBG("Setting Objective..\n");
-    printf("set objective");
+    printf("set objective\n");
     try {
         model.setObjective(objTotalWl, GRB_MINIMIZE);
         // assert(0);
@@ -414,13 +454,15 @@ void MacroPlacer::run2() {
     // model.setObjective(objTotalWl, GRB_MINIMIZE);
 
     // DBG("Solve model..\n");
+    printf("Solving model..\n");
     try {
-        printf("optimize()");
+        printf("optimize()\n");
         model.optimize();
     } catch (GRBException e) {
         printf("Exception message: %s.\n", e.getMessage().c_str());
     }
     
+    printf("Optimize() done.\n");
     // DBG("Optimize() done.\n");
     // DVD();
 
@@ -437,15 +479,23 @@ void MacroPlacer::run2() {
     // Time Limit.
     fileName += "_time_" + std::to_string(m_timeLimit);
 
+    // If initial solution is provided.
+    fileName += "_withInitSol";
+
+
     try {
+        printf("Writing model to %s.sol\n", fileName.c_str());
         model.write(fileName + ".sol");
         // DBG("Solution written to %s\n", fileName.c_str());
     } catch (GRBException e) {
         printf("Exception message: %s.\n", e.getMessage().c_str());
         // DBG("%s\n", e.getMessage().c_str());
     }
+    // printf("Writing model to %s.pl\n", fileName.c_str());
     // model.write(fileName + "pl");
+    // printf("Writing model to %s.sol\n", fileName.c_str());
     // model.write(fileName + "sol");
+    // printf("Writing model to %s.json\n", fileName.c_str());
     // model.write(fileName + "json");
 }
 
@@ -954,8 +1004,13 @@ void MacroPlacer::runBatchFromFile(const std::string batchFileName) {
         else if (tokens.size() == 11) {
             m_jobList.emplace_back(tokens[0],stoi(tokens[1]),stoi(tokens[2]),stoi(tokens[3]),stoi(tokens[4]),stod(tokens[5]),stod(tokens[6]),stoi(tokens[7]),stoi(tokens[8]), stod(tokens[9]), stoi(tokens[10]));
         }
+        else if (tokens.size() == 12) {
+            // add one more field for initial solution file.
+            m_jobList.emplace_back(tokens[0],stoi(tokens[1]),stoi(tokens[2]),stoi(tokens[3]),stoi(tokens[4]),stod(tokens[5]),stod(tokens[6]),stoi(tokens[7]),stoi(tokens[8]), stod(tokens[9]), stoi(tokens[10]), tokens[11]);
+            printf("Parsed Initial solution file for job[%s]: %s\n", tokens[0].c_str(), tokens[11].c_str());
+        }
         else {
-            printf("ERR: Unexpected input length: %d", tokens.size());
+            printf("ERR: Unexpected input length: %d\n", tokens.size());
         }
     }
     printf("Job size: %d\n", m_jobList.size());
@@ -977,6 +1032,7 @@ void MacroPlacer::runJobs() {
         setXYWeight(job.weightX, job.weightY);
         setRelativeConstraintXY(job.relativeConstraintX, job.relativeConstraintY);
         setTimeLimit(job.timeLimit);
+        setInitSolFileName(job.initSolFileName);
 
         printf("--------------------------------\n");
         printf("Run Job [%s]..\n", job.name.c_str());

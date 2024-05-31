@@ -2,6 +2,7 @@
 #define __ILPSOLVER_H__
 
 #include "gurobi_c++.h"
+#include <string>
 
 
 class ILPSolver
@@ -24,9 +25,11 @@ public:
         //     name(name), arraySizeY(arrSzY), arraySizeX(arrSzX), siteSizeY(stSzY), siteSizeX(stSzX), 
         //     weightX(wtX), weightY(wtY), relativeConstraintX(rltCstrX), relativeConstraintY(rltCstrY) {}
 
-        JOB(const std::string name, int arrSzY, int arrSzX, int stSzY, int stSzX, int wtX, int wtY, bool rltCstrX, bool rltCstrY, double timeLimit, int method) :
+        JOB(const std::string name, int arrSzY, int arrSzX, int stSzY, int stSzX, int wtX, int wtY, bool rltCstrX, bool rltCstrY, double timeLimit, int method, std::string initSolFileName = "") :
             name(name), arraySizeY(arrSzY), arraySizeX(arrSzX), siteSizeY(stSzY), siteSizeX(stSzX), 
-            weightX(wtX), weightY(wtY), relativeConstraintX(rltCstrX), relativeConstraintY(rltCstrY), timeLimit(timeLimit), method(method) {}
+            weightX(wtX), weightY(wtY), relativeConstraintX(rltCstrX), relativeConstraintY(rltCstrY), timeLimit(timeLimit), method(method)
+            , initSolFileName(initSolFileName)
+            {}
 
         std::string     name;
         int             arraySizeY;
@@ -39,7 +42,9 @@ public:
         bool            relativeConstraintY = 0;
         double          timeLimit = -1;
 
+
         int             method = -1; // -1: invalid; 0: Heuristic method; 1: Gurobi; 2: Gurobi w/o relativeConst;
+        std::string         initSolFileName = "";
 
     };
 
@@ -50,6 +55,7 @@ public:
     void    setRelativeConstraintY(bool b);
     void    setRelativeConstraintXY(bool bx, bool by);
     void    setTimeLimit(double timeLimit);
+    void    setInitSolFileName(const std::string initSolFileName);
     void    run();
     void    run2();
     void    run3();
@@ -97,6 +103,8 @@ private:
     bool m_relativeConstraintY = false;
 
     double m_timeLimit = -1;
+
+    std::string m_initSolFileName = "";
 
     // Vector2D<IndexType> m_dspIdArray;
     std::vector<JOB> m_jobList;
