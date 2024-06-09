@@ -278,7 +278,7 @@ void MacroPlacer::run2() {
     if (m_timeLimit > 0) {
         model.set(GRB_DoubleParam_TimeLimit, m_timeLimit);
     }
-    model.set(GRB_DoubleParam_NoRelHeurTime, m_timeLimit * 0.99);
+    model.set(GRB_DoubleParam_NoRelHeurTime, m_timeLimit * 0.80);
 
     // Add decision variables.
     

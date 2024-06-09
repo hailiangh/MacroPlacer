@@ -43,8 +43,8 @@ def plotFromFile(solFileName):
     wtY = 1
     if (len(tokens) > 6):
         # print("wtY = ", tokens[11])
-        print("len = ", len(tokens))
-        print("tokens is ", name[0])
+        # print("len = ", len(tokens))
+        # print("tokens is ", name[0])
         relPosX = int(tokens[7]) # bool, if relative position constraint is applied in X direction.
         relPosY = int(tokens[8]) # bool, if relative position constraint is applied in Y direction.
         wtX = float(tokens[10]) # weight in X direction.
@@ -87,14 +87,15 @@ def plotFromFile(solFileName):
     #     for j in range(X):
     #         print("(" + str(x[i][j]) + ", " + str(y[i][j]) + ")")
     
-    fig, (ax1, ax2) = plt.subplots(1, 2)
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(30,30))
     plt.subplots_adjust(top=0.72)
     height = 0.2
     width = 0.2
     ## Plot cells.
     for i in range(Y):
         for j in range(X):
-            s = "(" + str(i) + "," + str(j) + ")"
+            # s = "(" + str(i) + "," + str(j) + ")"
+            s = "(" + str(int(y[i][j])) + "," + str(int(x[i][j])) + ")"
             plotBox(j - 0.5 * width, i - 0.5 * height, width, height, colorMap(j, i, Y), edgeColorMap(j, i), ax1, s)
             # plotBox(x[i][j] - 0.5 * width, y[i][j] - 0.5 * height, width, height, colorMap(j, i, Y), edgeColorMap(j, i), ax2, s)
             plotBox(wtX * x[i][j] - 0.5 * width, wtY * y[i][j] - 0.5 * height, width, height, colorMap(j, i, Y), edgeColorMap(j, i), ax2, s)
@@ -121,9 +122,9 @@ def plotFromFile(solFileName):
     ax2.set_ylim([-1, wtY * targetHeight+1])
     ax2.set_title('Site limit: ' + str(targetHeight) + " x " + str(targetWidth))
     xticks =  list(range(targetWidth))
-    print("tick is", xticks)
+    # print("tick is", xticks)
     xticks = [x * wtX for x in xticks]
-    print("tick is", xticks)
+    # print("tick is", xticks)
     ax2.set_xticks(xticks)
     ax2.axis('equal')
     title = 'Total WL: ' + str(obj)
@@ -131,7 +132,7 @@ def plotFromFile(solFileName):
     title += '\nRelativePostionX: ' + str(relPosX) + "; RelativePositionY: " + str(relPosY) 
     fig.suptitle(title)
 
-    plt.savefig(plotFileName)
+    plt.savefig(plotFileName, dpi=600)
     plt.close()
 
 
